@@ -41,33 +41,35 @@ fn main() {
         match char_type {
             1 => {
                 add_value(
-                    &password,
+                    &mut password,
                     special_characters,
                     spe_cha_len,
-                    &previous_characters,
+                    &mut previous_characters,
                 );
             }
             2 => {
-                let mut new_char = get_char(number_characters, numbers_len);
-                if reroll(2, previous_characters.get_characters()) {
-                    new_char = get_char(number_characters, numbers_len);
-                }
-                password.push_str(new_char);
-                previous_characters.adjust(2);
+                add_value(
+                    &mut password,
+                    number_characters,
+                    numbers_len,
+                    &mut previous_characters,
+                );
             }
             3 => {
-                let mut new_char = get_char(lower_case_letter_characters, letters_len);
-                if reroll(3, previous_characters.get_characters()) {
-                    new_char = get_char(lower_case_letter_characters, letters_len);
-                }
-                password.push_str(new_char);
+                add_value(
+                    &mut password,
+                    lower_case_letter_characters,
+                    letters_len,
+                    &mut previous_characters,
+                );
             }
             _ => {
-                let mut new_char = get_char(capital_letter_characters, letters_len);
-                if reroll(4, previous_characters.get_characters()) {
-                    new_char = get_char(capital_letter_characters, letters_len);
-                }
-                password.push_str(new_char);
+                add_value(
+                    &mut password,
+                    capital_letter_characters,
+                    letters_len,
+                    &mut previous_characters
+                );
             }
         }
     }
