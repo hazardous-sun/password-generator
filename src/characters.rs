@@ -7,7 +7,7 @@ pub struct PreviousCharacters {
 impl PreviousCharacters {
     pub fn new() -> Self {
         PreviousCharacters {
-            characters: (-1, -1, -1)
+            characters: (-1, -1, -1),
         }
     }
 
@@ -50,4 +50,18 @@ pub fn reroll(new: i8, last: (i8, i8, i8)) -> bool {
         return true;
     }
     false
+}
+
+pub fn add_value(
+    password: &mut String,
+    string: &str,
+    len: usize,
+    previous: &mut PreviousCharacters,
+) {
+    let mut new_char = get_char(string, len);
+    if reroll(1, previous.get_characters()) {
+        new_char = get_char(string, len);
+    }
+    password.push_str(new_char);
+    previous.adjust(1);
 }
