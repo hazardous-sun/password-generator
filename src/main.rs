@@ -40,16 +40,34 @@ fn main() {
         let char_type: usize = get_char_type();
         match char_type {
             1 => {
-                password.push_str(get_char(special_characters, spe_cha_len));
+                let mut new_char = get_char(special_characters, spe_cha_len);
+                if reroll(1, previous_characters.get_characters()) {
+                    new_char = get_char(special_characters, spe_cha_len);
+                }
+                password.push_str(new_char);
+                previous_characters.adjust(1);
             }
             2 => {
-                password.push_str(get_char(number_characters, numbers_len));
+                let mut new_char = get_char(number_characters, numbers_len);
+                if reroll(2, previous_characters.get_characters()) {
+                    new_char = get_char(number_characters, numbers_len);
+                }
+                password.push_str(new_char);
+                previous_characters.adjust(2);
             }
             3 => {
-                password.push_str(get_char(lower_case_letter_characters, letters_len));
+                let mut new_char = get_char(lower_case_letter_characters, letters_len);
+                if reroll(3, previous_characters.get_characters()) {
+                    new_char = get_char(lower_case_letter_characters, letters_len);
+                }
+                password.push_str(new_char);
             }
             _ => {
-                password.push_str(get_char(capital_letter_characters, letters_len));
+                let mut new_char = get_char(capital_letter_characters, letters_len);
+                if reroll(4, previous_characters.get_characters()) {
+                    new_char = get_char(capital_letter_characters, letters_len);
+                }
+                password.push_str(new_char);
             }
         }
     }
