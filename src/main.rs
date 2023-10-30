@@ -68,7 +68,7 @@ fn main() {
                     &mut password,
                     capital_letter_characters,
                     letters_len,
-                    &mut previous_characters
+                    &mut previous_characters,
                 );
             }
         }
