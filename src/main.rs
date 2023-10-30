@@ -1,6 +1,32 @@
 use std::env;  // gets the values passed to main()
 use rand::Rng; // generates random values
 
+struct PreviousCharacters {
+    characters: (i8, i8, i8)
+}
+
+impl PreviousCharacters {
+    pub fn new() -> Self {
+        PreviousCharacters {
+            characters: (-1, -1, -1)
+        }
+    }
+
+    pub fn adjust(&mut self, last: i8) {
+        let (first, second, _) = self.characters;
+        self.characters = (last, first, second);
+    }
+}
+
+fn get_char_type() -> usize {
+    rand::thread_rng().gen_range(1..5)
+}
+
+fn get_char(str: &str, str_len: usize) -> &str {
+    let pos = rand::thread_rng().gen_range(0..str_len);
+    &str[pos..pos + 1]
+}
+
 fn main() {
     let args: Vec<_> = env::args().collect();
 
@@ -22,6 +48,7 @@ fn main() {
         }
     }
 
+    let mut previous_characters = PreviousCharacters::new();
     let mut password: String = String::from("");
 
     let special_characters: &str = "?!@#$%&*()-_=|+[];:><";
@@ -34,23 +61,19 @@ fn main() {
     let spe_cha_len: usize = special_characters.len();
 
     for _ in 0 .. pass_len {
-        let char_type: usize = rand::thread_rng().gen_range(1..5);
+        let char_type: usize = get_char_type();
         match char_type {
             1 => {
-                let random_spe_cha: usize = rand::thread_rng().gen_range(0..spe_cha_len);
-                password.push_str(&special_characters[random_spe_cha..random_spe_cha + 1])
+                password.push_str(get_char(special_characters, spe_cha_len));
             }
             2 => {
-                let random_number: usize = rand::thread_rng().gen_range(0..numbers_len);
-                password.push_str(&number_characters[random_number..random_number + 1]);
+                password.push_str(get_char(number_characters, numbers_len));
             }
             3 => {
-                let random_letter: usize = rand::thread_rng().gen_range(0..letters_len);
-                password.push_str(&lower_case_letter_characters[random_letter..random_letter + 1]);
+                password.push_str(get_char(lower_case_letter_characters, letters_len));
             }
             _ => {
-                let random_letter: usize = rand::thread_rng().gen_range(0..letters_len);
-                password.push_str(&capital_letter_characters[random_letter..random_letter + 1]);
+                password.push_str(get_char(capital_letter_characters, letters_len));
             }
         }
     }
