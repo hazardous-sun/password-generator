@@ -1,7 +1,7 @@
 mod characters;
 
-use std::env;  // gets the values passed to main()
 use characters::*;
+use std::env; // gets the values passed to main()
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -36,16 +36,16 @@ fn main() {
     let numbers_len: usize = number_characters.len();
     let spe_cha_len: usize = special_characters.len();
 
-    for _ in 0 .. pass_len {
+    for _ in 0..pass_len {
         let char_type: usize = get_char_type();
         match char_type {
             1 => {
-                let mut new_char = get_char(special_characters, spe_cha_len);
-                if reroll(1, previous_characters.get_characters()) {
-                    new_char = get_char(special_characters, spe_cha_len);
-                }
-                password.push_str(new_char);
-                previous_characters.adjust(1);
+                add_value(
+                    &password,
+                    special_characters,
+                    spe_cha_len,
+                    &previous_characters,
+                );
             }
             2 => {
                 let mut new_char = get_char(number_characters, numbers_len);
