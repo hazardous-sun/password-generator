@@ -1,10 +1,12 @@
 # Password Generator
 
+This is a simple random password generator written in Rust as a way of studying some basic concepts of the language.
+
 ## Installation
 
-To install the password generator just run `cargo build` and then mv the "target/debug/password_generator" to /bin/ for
-easy access on shell.
+Apart from just running `cargo build` and then running the executable file generated inside "target/debug", you can use
+the "installer.sh" as sudo to add the command to "/bin/" in order to easy running the command on a CLI.
 
 ## Usage
 
-`password_generator [PASSWORD_LENGTH]`
+`password_generator [PASSWORD_LEN]`
