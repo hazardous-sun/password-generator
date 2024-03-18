@@ -2,20 +2,20 @@ use rand::Rng;
 use std::env;
 use std::error::Error;
 
-// struct that will be used to run the program
 pub struct Config {
     len: i32,
     upper_case: bool,
     lower_case: bool,
     numbers: bool,
     math_symbols: bool,
-    extra_symbols: bool
+    extra_symbols: bool,
+    check_repetition: bool
 }
 
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 2 {
-            return Err("ERROR: No parameters passed!\nUsage: passgen [PASSWORD_LEN]");
+            return Err("No parameters passed!\nUsage: passgen [PASSWORD_LEN]");
         }
 
         let pass_len: i32;
@@ -26,7 +26,7 @@ impl Config {
                 pass_len = number;
             }
             Err(_) => {
-                return Err("ERROR: Insert a valid integer for the password length.");
+                return Err("Insert a valid integer for the password length.");
             }
         }
 
@@ -36,7 +36,8 @@ impl Config {
             lower_case: env::var("LOWER_CASE").is_ok(),
             numbers: env::var("NUMBERS").is_ok(),
             math_symbols: env::var("MATH_SYM").is_ok(),
-            extra_symbols: env::var("EXTRA_SYM").is_ok()
+            extra_symbols: env::var("EXTRA_SYM").is_ok(),
+            check_repetition: env::var("CHECK_REP").is_ok()
         })
     }
 }
@@ -47,25 +48,48 @@ struct Symbols {
     numbers: &'static str,
     math_symbols: &'static str,
     extra_symbols: &'static str,
+    valid_char: &'static [i8]
 }
 
 impl Symbols {
-    fn build() -> Symbols {
+    fn new(config: Config) -> Symbols {
+        let upper_case = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let lower_case = "abcdefghijklmnopqrstuvwxyz";
+        let numbers = "0123456789";
+        let math_symbols = "-+=*/><[]{}()";
+        let extra_symbols = "?!@#$%&_|;:";
+
+        let mut valid_char: Vec<i8> = Vec::new();
+
+        if config.upper_case { valid_char.push(1); }
+        if config.lower_case { valid_char.push(2); }
+        if config.numbers { valid_char.push(3); }
+        if config.math_symbols { valid_char.push(4); }
+        if config.extra_symbols { valid_char.push(5); }
+
         Symbols {
-            upper_case: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            lower_case: "abcdefghijklmnopqrstuvwxyz",
-            numbers: "0123456789",
-            math_symbols: "-+=*/><[]{}()",
-            extra_symbols: "?!@#$%&_|;:"
+            upper_case,
+            lower_case,
+            numbers,
+            math_symbols,
+            extra_symbols,
+            valid_char: valid_char.as_slice()
         }
     }
+
+    fn get_char(&self, str: &str) -> &char {
+        let pos = rand::thread_rng().gen_range(0..str.len() - 1);
+        &str.chars().nth(pos).unwrap()
+    }
+
+    fn get_char_type(&self) -> usize {
+        rand::thread_rng().gen_range(1..5)
+    }
+
+    fn add_value(&self) {}
 }
 
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-
-}
-
-pub struct PreviousCharacters {
+struct PreviousCharacters {
     characters: (i8, i8, i8),
 }
 
@@ -86,13 +110,50 @@ impl PreviousCharacters {
     }
 }
 
-pub fn get_char_type() -> usize {
-    rand::thread_rng().gen_range(1..5)
-}
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let mut password: String = String::from("");
+    let mut previous_characters = PreviousCharacters::new();
+    let symbols = Symbols::new(config);
 
-pub fn get_char(str: &str, str_len: usize) -> &str {
-    let pos = rand::thread_rng().gen_range(0..str_len);
-    &str[pos..pos + 1]
+    for _ in 0..config.len {
+        let char_type: usize = symbols.get_char_type();
+        match char_type {
+            1 => {
+                add_value(
+                    &mut password,
+                    special_characters,
+                    spe_cha_len,
+                    &mut previous_characters,
+                );
+            }
+            2 => {
+                add_value(
+                    &mut password,
+                    number_characters,
+                    numbers_len,
+                    &mut previous_characters,
+                );
+            }
+            3 => {
+                add_value(
+                    &mut password,
+                    lower_case_letter_characters,
+                    letters_len,
+                    &mut previous_characters,
+                );
+            }
+            _ => {
+                add_value(
+                    &mut password,
+                    capital_letter_characters,
+                    letters_len,
+                    &mut previous_characters,
+                );
+            }
+        }
+    }
+
+    println!("{}", password);
 }
 
 pub fn check_repetition(new: i8, last: (i8, i8, i8)) -> i8 {
