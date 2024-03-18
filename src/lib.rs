@@ -37,13 +37,13 @@ impl Config {
         let mut check_rep = false;
 
         for flag in args.iter() {
-            match flag.to_uppercase().as_str() {
-                "UPPER" => { upper = true; },
-                "LOWER" => { lower = true; },
-                "NUMBERS" => { numbers = true; },
-                "BASIC_SYM" => { basic_sym = true; },
-                "EXTRA_SYM" => { extra_sym = true; },
-                "CHECK_REP" => { check_rep = true; },
+            match flag.to_lowercase().as_str() {
+                "--upper" | "-u" => { upper = true; },
+                "--lower" | "-l" => { lower = true; },
+                "--numbers" | "-n" => { numbers = true; },
+                "--basic-sym" | "-b" => { basic_sym = true; },
+                "--extra-sym" | "-e" => { extra_sym = true; },
+                "--check-rep" | "-r" => { check_rep = true; },
                 _ => ()
             }
         }
