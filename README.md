@@ -8,20 +8,23 @@ Apart from just running the application with Cargo, you can use the "installer.s
 to `/usr/bin/` in order to easy running the command
 on a CLI.
 
-## Usage
+## Options
 
-### Cargo
-
-```shell
-[OPTIONS] cargo run [PASSWORD_LEN]
-```
-
-#### Environment variables
-
-* UPPER_CASE: Allows the usage of upper case letters in the password -> "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-* LOWER_CASE: Allows the usage of lower case letters in the password -> "abcdefghijklmnopqrstuvwxyz"
-* NUMBERS: Allows the usage of numbers in the password -> "0123456789"
-* MATH_SYM: Allows the usage of math symbols in the password -> "-+=*/><[]{}()"
-* EXTRA_SYM: Allows the usage of extra symbols in the password -> "?!@#$%&_|;:"
-* CHECK_REP: Checks for character repetitions in the password. If the character is equal to 2 of the last 3 inserted,
-  the program inserts a different one.
+* -u    --upper
+  * Allows the usage of upper case letters in the password
+  * `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+* -l    --lower
+  * Allows the usage of lower case letters in the password
+  * `abcdefghijklmnopqrstuvwxyz`
+* -n    --numbers
+  * Allows the usage of numbers in the password
+  * `0123456789`
+* -b    --basic-sym
+  * Allows the usage of math symbols in the password
+  * `-+=*/><[]{}()`
+* -e    --extra-sym
+  * Allows the usage of extra symbols in the password
+  * `?!@#$%&_|;:`
+* -r    --check-rep
+  * Checks for character repetitions in the password. If the character is equal to two of the last three digits,
+    the program rerolls the character and inserts a different one.
