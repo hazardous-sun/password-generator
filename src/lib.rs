@@ -1,6 +1,5 @@
 use rand::Rng;
-use std::env;
-use std::error::Error;
+use std::{env, error::Error};
 
 pub struct Config {
     len: i32,
@@ -48,13 +47,19 @@ struct Symbols {
 
 impl Symbols {
     fn new(config: &Config) -> Symbols {
-        let characters: Vec<&'static str> = vec![
-            if !config.upper_case { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" } else { "" },
-            if !config.lower_case { "abcdefghijklmnopqrstuvwxyz" } else { "" },
-            if !config.numbers { "0123456789" } else { "" },
-            if !config.math_symbols { "-+=*/><[]{}()"} else { "" },
-            if !config.extra_symbols { "?!@#$%&_|;:" } else { "" },
-        ];
+        let mut characters: Vec<&'static str> = Vec::new();
+
+        if config.upper_case { characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); }
+        if config.lower_case { characters.push("abcdefghijklmnopqrstuvwxyz"); }
+        if config.numbers { characters.push("0123456789"); }
+        if config.math_symbols { characters.push("-+=*/><[]{}()"); }
+        if config.extra_symbols { characters.push("?!@#$%&_|;:"); }
+
+        if characters.len() <= 1 {
+            characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            characters.push("abcdefghijklmnopqrstuvwxyz");
+            characters.push("0123456789");
+        }
 
         Symbols {
             characters,
