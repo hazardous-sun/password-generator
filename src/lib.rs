@@ -36,8 +36,17 @@ impl Config {
         let mut extra_sym = false;
         let mut check_rep = false;
 
-        for flag in args.iter() {
+        'flags: for flag in args.iter() {
             match flag.to_lowercase().as_str() {
+                "--all" | "-a" => {
+                    upper = true;
+                    lower = true;
+                    numbers = true;
+                    basic_sym = true;
+                    extra_sym = true;
+                    check_rep = true;
+                    break 'flags;
+                },
                 "--upper" | "-u" => { upper = true; },
                 "--lower" | "-l" => { lower = true; },
                 "--numbers" | "-n" => { numbers = true; },
@@ -78,6 +87,8 @@ impl Symbols {
             characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
             characters.push("abcdefghijklmnopqrstuvwxyz");
             characters.push("0123456789");
+            characters.push("-+=*/><[]{}()");
+            characters.push("?!@#$%&_|;:");
         }
 
         Symbols {
