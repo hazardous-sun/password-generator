@@ -14,7 +14,7 @@ pub struct Config {
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 2 {
-            return Err("No parameters passed!\nUsage: passgen [PASSWORD_LEN]");
+            return Err("ERROR: No parameters passed!\nUsage: passgen [PASSWORD_LEN]");
         }
 
         let pass_len: i32;
@@ -25,7 +25,7 @@ impl Config {
                 pass_len = number;
             }
             Err(_) => {
-                return Err("Insert a valid integer for the password length.");
+                return Err("ERROR: Insert a valid integer for the password length.");
             }
         }
 
@@ -53,6 +53,9 @@ impl Config {
                 "--basic-sym" | "-b" => { basic_sym = true; },
                 "--extra-sym" | "-e" => { extra_sym = true; },
                 "--check-rep" | "-r" => { check_rep = true; },
+                "--help" | "-h" => {
+                    return Err("Usage: passgen [PASS_GEN] [OPTIONS]\n-a -u -l -n -b -e -r");
+                },
                 _ => ()
             }
         }
