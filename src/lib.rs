@@ -94,7 +94,7 @@ impl Symbols {
         let mut char_type;
 
         if self.characters.len() > 1 {
-            char_type = rand::thread_rng().gen_range(1..self.characters.len() - 1);
+            char_type = rand::thread_rng().gen_range(0..=self.characters.len() - 1);
             return (self.characters[char_type], char_type as i8);
         }
 
