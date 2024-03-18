@@ -9,7 +9,7 @@ pub struct Config {
     numbers: bool,
     math_symbols: bool,
     extra_symbols: bool,
-    check_repetition: bool
+    check_repetition: bool,
 }
 
 impl Config {
@@ -30,15 +30,15 @@ impl Config {
             }
         }
 
-        return Ok(Config{
+        return Ok(Config {
             len: pass_len,
             upper_case: env::var("UPPER_CASE").is_ok(),
             lower_case: env::var("LOWER_CASE").is_ok(),
             numbers: env::var("NUMBERS").is_ok(),
             math_symbols: env::var("MATH_SYM").is_ok(),
             extra_symbols: env::var("EXTRA_SYM").is_ok(),
-            check_repetition: env::var("CHECK_REP").is_ok()
-        })
+            check_repetition: env::var("CHECK_REP").is_ok(),
+        });
     }
 }
 
@@ -48,7 +48,7 @@ struct Symbols {
     numbers: &'static str,
     math_symbols: &'static str,
     extra_symbols: &'static str,
-    valid_char: &'static [i8]
+    valid_char: &'static [i8],
 }
 
 impl Symbols {
@@ -73,20 +73,34 @@ impl Symbols {
             numbers,
             math_symbols,
             extra_symbols,
-            valid_char: valid_char.as_slice()
+            valid_char: valid_char.as_slice(),
         }
     }
 
-    fn get_char(&self, str: &str) -> &char {
+    fn get_char(&self, str: &str) -> char {
         let pos = rand::thread_rng().gen_range(0..str.len() - 1);
-        &str.chars().nth(pos).unwrap()
+        str.clone().chars().nth(pos).unwrap()
     }
 
-    fn get_char_type(&self) -> usize {
-        rand::thread_rng().gen_range(1..5)
+    fn get_char_type(&self) -> i8 {
+        let char_type = rand::thread_rng().gen_range(1..self.valid_char.len() - 1);
+        self.valid_char[char_type]
     }
 
-    fn add_value(&self) {}
+    fn add_value(
+        &self,
+        config: &Config,
+        password: &mut String,
+        str: &str,
+        previous: &mut PreviousCharacters,
+    ) {
+        let mut new_char: char = self.get_char(str);
+        if config.check_repetition && previous.reroll(1) {
+            new_char = self.get_char(str);
+        }
+        password.push(new_char);
+        previous.adjust(1);
+    }
 }
 
 struct PreviousCharacters {
@@ -108,6 +122,28 @@ impl PreviousCharacters {
         let (first, second, _) = self.characters;
         self.characters = (last, first, second);
     }
+
+    fn check_repetition(last: (i8, i8, i8), new: i8) -> i8 {
+        let mut repetitions: i8 = 0;
+        if new == last.0 {
+            repetitions += 1;
+        }
+        if new == last.1 {
+            repetitions += 1;
+        }
+        if new == last.2 {
+            repetitions += 1;
+        }
+        repetitions
+    }
+
+    fn reroll(&self, new: i8) -> bool {
+        let repetitions = self.check_repetition(self.characters, new);
+        if repetitions >= 2 {
+            return true;
+        }
+        false
+    }
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -116,78 +152,52 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let symbols = Symbols::new(config);
 
     for _ in 0..config.len {
-        let char_type: usize = symbols.get_char_type();
+        let char_type = symbols.get_char_type();
         match char_type {
             1 => {
-                add_value(
+                symbols.add_value(
+                    &config,
                     &mut password,
-                    special_characters,
-                    spe_cha_len,
+                    symbols.upper_case,
                     &mut previous_characters,
-                );
+                )?;
             }
             2 => {
-                add_value(
+                symbols.add_value(
+                    &config,
                     &mut password,
-                    number_characters,
-                    numbers_len,
+                    symbols.lower_case,
                     &mut previous_characters,
-                );
+                )?;
             }
             3 => {
-                add_value(
+                symbols.add_value(
+                    &config,
                     &mut password,
-                    lower_case_letter_characters,
-                    letters_len,
+                    symbols.numbers,
                     &mut previous_characters,
-                );
+                )?;
             }
-            _ => {
-                add_value(
+            4 => {
+                symbols.add_value(
+                    &config,
                     &mut password,
-                    capital_letter_characters,
-                    letters_len,
+                    symbols.math_symbols,
                     &mut previous_characters,
-                );
+                )?;
             }
+            5 => {
+                symbols.add_value(
+                    &config,
+                    &mut password,
+                    symbols.extra_symbols,
+                    &mut previous_characters,
+                )?;
+            }
+            _ => ()
         }
     }
 
     println!("{}", password);
-}
-
-pub fn check_repetition(new: i8, last: (i8, i8, i8)) -> i8 {
-    let mut repetitions: i8 = 0;
-    if new == last.0 {
-        repetitions += 1;
-    }
-    if new == last.1 {
-        repetitions += 1;
-    }
-    if new == last.2 {
-        repetitions += 1;
-    }
-    repetitions
-}
-
-pub fn reroll(new: i8, last: (i8, i8, i8)) -> bool {
-    let repetitions = check_repetition(new, last);
-    if repetitions >= 2 {
-        return true;
-    }
-    false
-}
-
-pub fn add_value(
-    password: &mut String,
-    string: &str,
-    len: usize,
-    previous: &mut PreviousCharacters,
-) {
-    let mut new_char = get_char(string, len);
-    if reroll(1, previous.get_characters()) {
-        new_char = get_char(string, len);
-    }
-    password.push_str(new_char);
-    previous.adjust(1);
+    Ok(())
 }
