@@ -72,8 +72,14 @@ impl Symbols {
     }
 
     fn get_char_type(&self) -> (&'static str, i8) {
-        let char_type = rand::thread_rng().gen_range(1..self.characters.len() - 1);
-        (self.characters[char_type], char_type as i8)
+        let mut char_type;
+
+        if self.characters.len() > 1 {
+            char_type = rand::thread_rng().gen_range(1..self.characters.len() - 1);
+            return (self.characters[char_type], char_type as i8);
+        }
+
+        (self.characters[0], 0)
     }
 
     fn add_value(
