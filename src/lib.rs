@@ -3,12 +3,12 @@ use std::{env, error::Error};
 
 pub struct Config {
     len: i32,
-    upper_case: bool,
-    lower_case: bool,
+    upper: bool,
+    lower: bool,
     numbers: bool,
-    math_symbols: bool,
-    extra_symbols: bool,
-    check_repetition: bool,
+    basic_sym: bool,
+    extra_sym: bool,
+    check_rep: bool,
 }
 
 impl Config {
@@ -29,14 +29,33 @@ impl Config {
             }
         }
 
+        let mut upper = false;
+        let mut lower = false;
+        let mut numbers = false;
+        let mut basic_sym = false;
+        let mut extra_sym = false;
+        let mut check_rep = false;
+
+        for flag in args.iter() {
+            match flag.to_uppercase().as_str() {
+                "UPPER" => { upper = true; },
+                "LOWER" => { lower = true; },
+                "NUMBERS" => { numbers = true; },
+                "BASIC_SYM" => { basic_sym = true; },
+                "EXTRA_SYM" => { extra_sym = true; },
+                "CHECK_REP" => { check_rep = true; },
+                _ => ()
+            }
+        }
+
         return Ok(Config {
             len: pass_len,
-            upper_case: env::var("UPPER_CASE").is_ok(),
-            lower_case: env::var("LOWER_CASE").is_ok(),
-            numbers: env::var("NUMBERS").is_ok(),
-            math_symbols: env::var("MATH_SYM").is_ok(),
-            extra_symbols: env::var("EXTRA_SYM").is_ok(),
-            check_repetition: env::var("CHECK_REP").is_ok(),
+            upper,
+            lower,
+            numbers,
+            basic_sym,
+            extra_sym,
+            check_rep,
         });
     }
 }
@@ -49,11 +68,11 @@ impl Symbols {
     fn new(config: &Config) -> Symbols {
         let mut characters: Vec<&'static str> = Vec::new();
 
-        if config.upper_case { characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); }
-        if config.lower_case { characters.push("abcdefghijklmnopqrstuvwxyz"); }
+        if config.upper { characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); }
+        if config.lower { characters.push("abcdefghijklmnopqrstuvwxyz"); }
         if config.numbers { characters.push("0123456789"); }
-        if config.math_symbols { characters.push("-+=*/><[]{}()"); }
-        if config.extra_symbols { characters.push("?!@#$%&_|;:"); }
+        if config.basic_sym { characters.push("-+=*/><[]{}()"); }
+        if config.extra_sym { characters.push("?!@#$%&_|;:"); }
 
         if characters.len() < 1 {
             characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -91,7 +110,7 @@ impl Symbols {
         previous: &mut PreviousCharacters,
     ) {
         let mut new_char: char = self.get_char(str);
-        if config.check_repetition && previous.reroll(char_type) {
+        if config.check_rep && previous.reroll(char_type) {
             new_char = self.get_char(str);
         }
         password.push(new_char);
