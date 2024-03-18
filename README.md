@@ -12,7 +12,9 @@ on a CLI.
 
 ### Cargo
 
-`[OPTIONS] cargo run [PASSWORD_LEN]`
+```shell
+[OPTIONS] cargo run [PASSWORD_LEN]
+```
 
 #### Environment variables
 
