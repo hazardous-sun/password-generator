@@ -1,6 +1,6 @@
 use std::{env, process};
 
-use password_generator::Config;
+use passgen::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,7 +9,7 @@ fn main() {
         process::exit(1);
     });
 
-    if let Err(err) = password_generator::run(config) {
+    if let Err(err) = passgen::run(config) {
         eprintln!("ERROR: {err}");
         process::exit(1);
     }
