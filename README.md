@@ -4,8 +4,8 @@ This is a simple random password generator written in Rust as a way of studying 
 
 ## Installation
 
-Apart from just running with application with Cargo, you can use the "installer.sh" as sudo to add the command to "
-/bin/" in order to easy running the command
+Apart from just running the application with Cargo, you can use the "installer.sh" as sudo to add the command
+to `/usr/bin/` in order to easy running the command
 on a CLI.
 
 ## Usage
@@ -21,5 +21,5 @@ on a CLI.
 * NUMBERS: Allows the usage of numbers in the password -> "0123456789"
 * MATH_SYM: Allows the usage of math symbols in the password -> "-+=*/><[]{}()"
 * EXTRA_SYM: Allows the usage of extra symbols in the password -> "?!@#$%&_|;:"
-* CHECK_REP: Checks for character repetitions in the password. If the character is equal to 2 of the last 3 inserted, 
-the program inserts a different one.
+* CHECK_REP: Checks for character repetitions in the password. If the character is equal to 2 of the last 3 inserted,
+  the program inserts a different one.
