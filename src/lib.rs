@@ -43,59 +43,44 @@ impl Config {
 }
 
 struct Symbols {
-    upper_case: &'static str,
-    lower_case: &'static str,
-    numbers: &'static str,
-    math_symbols: &'static str,
-    extra_symbols: &'static str,
-    valid_char: &'static [i8],
+    characters: Vec<&'static str>,
 }
 
 impl Symbols {
-    fn new(config: Config) -> Symbols {
-        let upper_case = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let lower_case = "abcdefghijklmnopqrstuvwxyz";
-        let numbers = "0123456789";
-        let math_symbols = "-+=*/><[]{}()";
-        let extra_symbols = "?!@#$%&_|;:";
-
-        let mut valid_char: Vec<i8> = Vec::new();
-
-        if config.upper_case { valid_char.push(1); }
-        if config.lower_case { valid_char.push(2); }
-        if config.numbers { valid_char.push(3); }
-        if config.math_symbols { valid_char.push(4); }
-        if config.extra_symbols { valid_char.push(5); }
+    fn new(config: &Config) -> Symbols {
+        let characters: Vec<&'static str> = vec![
+            if !config.upper_case { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" } else { "" },
+            if !config.lower_case { "abcdefghijklmnopqrstuvwxyz" } else { "" },
+            if !config.numbers { "0123456789" } else { "" },
+            if !config.math_symbols { "-+=*/><[]{}()"} else { "" },
+            if !config.extra_symbols { "?!@#$%&_|;:" } else { "" },
+        ];
 
         Symbols {
-            upper_case,
-            lower_case,
-            numbers,
-            math_symbols,
-            extra_symbols,
-            valid_char: valid_char.as_slice(),
+            characters,
         }
     }
 
-    fn get_char(&self, str: &str) -> char {
+    fn get_char(&self, str: &'static str) -> char {
         let pos = rand::thread_rng().gen_range(0..str.len() - 1);
-        str.clone().chars().nth(pos).unwrap()
+        str.chars().nth(pos).unwrap()
     }
 
-    fn get_char_type(&self) -> i8 {
-        let char_type = rand::thread_rng().gen_range(1..self.valid_char.len() - 1);
-        self.valid_char[char_type]
+    fn get_char_type(&self) -> (&'static str, i8) {
+        let char_type = rand::thread_rng().gen_range(1..self.characters.len() - 1);
+        (self.characters[char_type], char_type as i8)
     }
 
     fn add_value(
         &self,
         config: &Config,
         password: &mut String,
-        str: &str,
+        str: &'static str,
+        char_type: i8,
         previous: &mut PreviousCharacters,
     ) {
         let mut new_char: char = self.get_char(str);
-        if config.check_repetition && previous.reroll(1) {
+        if config.check_repetition && previous.reroll(char_type) {
             new_char = self.get_char(str);
         }
         password.push(new_char);
@@ -114,16 +99,12 @@ impl PreviousCharacters {
         }
     }
 
-    pub fn get_characters(&self) -> (i8, i8, i8) {
-        self.characters
-    }
-
-    pub fn adjust(&mut self, last: i8) {
+    fn adjust(&mut self, last: i8) {
         let (first, second, _) = self.characters;
         self.characters = (last, first, second);
     }
 
-    fn check_repetition(last: (i8, i8, i8), new: i8) -> i8 {
+    fn check_repetition(&self, last: (i8, i8, i8), new: i8) -> i8 {
         let mut repetitions: i8 = 0;
         if new == last.0 {
             repetitions += 1;
@@ -149,53 +130,17 @@ impl PreviousCharacters {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut password: String = String::from("");
     let mut previous_characters = PreviousCharacters::new();
-    let symbols = Symbols::new(config);
+    let symbols = Symbols::new(&config);
 
     for _ in 0..config.len {
-        let char_type = symbols.get_char_type();
-        match char_type {
-            1 => {
-                symbols.add_value(
-                    &config,
-                    &mut password,
-                    symbols.upper_case,
-                    &mut previous_characters,
-                )?;
-            }
-            2 => {
-                symbols.add_value(
-                    &config,
-                    &mut password,
-                    symbols.lower_case,
-                    &mut previous_characters,
-                )?;
-            }
-            3 => {
-                symbols.add_value(
-                    &config,
-                    &mut password,
-                    symbols.numbers,
-                    &mut previous_characters,
-                )?;
-            }
-            4 => {
-                symbols.add_value(
-                    &config,
-                    &mut password,
-                    symbols.math_symbols,
-                    &mut previous_characters,
-                )?;
-            }
-            5 => {
-                symbols.add_value(
-                    &config,
-                    &mut password,
-                    symbols.extra_symbols,
-                    &mut previous_characters,
-                )?;
-            }
-            _ => ()
-        }
+        let (str, char_type) = symbols.get_char_type();
+        symbols.add_value(
+            &config,
+            &mut password,
+            str,
+            char_type,
+            &mut previous_characters,
+        )
     }
 
     println!("{}", password);
