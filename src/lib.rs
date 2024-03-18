@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::{env, error::Error};
+use std::error::Error;
 
 pub struct Config {
     len: i32,
