@@ -55,7 +55,7 @@ impl Symbols {
         if config.math_symbols { characters.push("-+=*/><[]{}()"); }
         if config.extra_symbols { characters.push("?!@#$%&_|;:"); }
 
-        if characters.len() <= 1 {
+        if characters.len() < 1 {
             characters.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
             characters.push("abcdefghijklmnopqrstuvwxyz");
             characters.push("0123456789");
