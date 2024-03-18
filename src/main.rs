@@ -1,9 +1,17 @@
-mod characters;
+mod lib;
 
-use characters::*;
-use std::env; // gets the values passed to main()
+use lib;
+use std::env;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    let config = match lib::Config::build(&args) {
+        Ok(config) => config,
+        Err(e) => panic!(e)
+    };
+}
+
+fn caller() {
     let args: Vec<_> = env::args().collect();
 
     if args.len() < 2 {
@@ -27,7 +35,7 @@ fn main() {
     let mut previous_characters = PreviousCharacters::new();
     let mut password: String = String::from("");
 
-    let special_characters: &str = "?!@#$%&*()-_=|+[];:><";
+    let special_characters: &str = "?!@#$%&_|;:";
     let number_characters: &str = "0123456789";
     let lower_case_letter_characters: &str = "abcdefghijklmnopqrstuvwxyz";
     let capital_letter_characters: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
