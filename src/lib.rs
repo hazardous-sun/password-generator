@@ -26,7 +26,8 @@ impl Config {
     /// # Examples
     ///
     /// ```rust
-    /// let config = Config::build(&["", "12", "-u", "--numbers"]).unwrap();
+    /// use passgen::Config;
+    /// let config = Config::build(&["".to_string(), "12".to_string(), "-u".to_string(), "--numbers".to_string()]).unwrap();
     /// ```
     ///
     /// # Errors
@@ -166,7 +167,7 @@ impl Symbols {
     ///
     /// A tuple containing a reference to a character set string slice (`&'static str`) and its corresponding character type index (`i8`).
     fn get_char_type(&self) -> (&'static str, i8) {
-        let mut char_type;
+        let char_type;
 
         if self.characters.len() > 1 {
             char_type = rand::thread_rng().gen_range(0..=self.characters.len() - 1);
@@ -306,7 +307,7 @@ impl PreviousCharacters {
 /// # Returns
 ///
 /// A `Result` type. On success, it returns `Ok(())`. On error, it returns an error wrapped in a `Box<dyn Error>`.
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+pub fn run(config: Config) -> Result<String, Box<dyn Error>> {
     let mut password: String = String::from("");
     let mut previous_characters = PreviousCharacters::new();
     let symbols = Symbols::new(&config);
@@ -323,7 +324,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
 
     println!("{}", password);
-    Ok(())
+    Ok(password)
 }
 
 #[cfg(test)]
@@ -331,19 +332,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn config_build() {
+    fn config_build_valid_args() {
+        // Test without flags provided
         let program_name = String::from("program name");
-        let password_name = String::from("16");
-        let o1 = String::from("-u");
-        let o2 = String::from("--lower");
-        let o3 = String::from("-r");
+        let password_len = String::from("16");
+
+        let args = vec![program_name.clone(), password_len.clone()];
+
+        let config = Config {
+            len: 16,
+            upper: false,
+            lower: false,
+            numbers: false,
+            basic_sym: false,
+            extra_sym: false,
+            check_rep: false,
+        };
+
+        assert_eq!(Ok(config), Config::build(&args));
+
+        // Test with flags provided
+        let f1 = String::from("-u");
+        let f2 = String::from("--lower");
+        let f3 = String::from("-r");
 
         let args = vec![
             program_name,
-            password_name,
-            o1,
-            o2,
-            o3,
+            password_len,
+            f1,
+            f2,
+            f3,
         ];
 
         let config = Config {
@@ -356,6 +374,23 @@ mod tests {
             check_rep: true,
         };
 
-        assert_eq!(config, Config::build(&args).expect("Config not correctly built"));
+        assert_eq!(Ok(config), Config::build(&args));
+    }
+
+    #[test]
+    fn config_build_invalid_args() {
+        // Test with a non-numeric password length:
+        let args = vec!["program_name".to_string(), "abc".to_string(), "-u".to_string()];
+        assert_eq!("ERROR: Insert a valid integer for the password length.",
+                   Config::build(&args).unwrap_err());
+
+        // Test with too few arguments:
+        let args = vec!["program_name".to_string()];
+        assert_eq!("ERROR: No parameters passed!\nUsage: passgen [PASSWORD_LEN]",
+                   Config::build(&args).unwrap_err());
+
+        // Test with unsupported flags:
+        let args = vec!["program_name".to_string(), "12".to_string(), "--unknown-flag".to_string()];
+        assert!(Config::build(&args).is_ok());
     }
 }
