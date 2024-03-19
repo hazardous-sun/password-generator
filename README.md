@@ -16,8 +16,8 @@ cargo run
 
 ### Optional Installation Script:
 
-For easier access from the command line, you can optionally use the provided installer.sh script. However, run this
-script with caution as it involves using sudo and modifying system paths.
+For easier access from the command line, you can optionally use the provided [installer.sh script](INSTALLER.md).
+However, run this script with caution as it involves using sudo and modifying system paths.
 
 Here's how to use it (if you choose to):
 
