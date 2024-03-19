@@ -1,6 +1,7 @@
 use rand::Rng;
 use std::error::Error;
 
+#[derive(Debug, PartialEq)]
 pub struct Config {
     len: i32,
     upper: bool,
@@ -189,4 +190,38 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     println!("{}", password);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_build() {
+        let program_name = String::from("program name");
+        let password_name = String::from("16");
+        let o1 = String::from("-u");
+        let o2 = String::from("--lower");
+        let o3 = String::from("-r");
+
+        let args = vec![
+            program_name,
+            password_name,
+            o1,
+            o2,
+            o3
+        ];
+
+        let config = Config {
+            len: 16,
+            upper: true,
+            lower: true,
+            numbers: false,
+            basic_sym: false,
+            extra_sym: false,
+            check_rep: true
+        };
+
+        assert_eq!(config, Config::build(&args).expect("Config not correctly built"));
+    }
 }
