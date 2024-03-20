@@ -34,6 +34,7 @@ impl Config {
     ///
     /// - Returns an error if no arguments are provided.
     /// - Returns an error if the second argument is not a valid integer for password length.
+    /// - Returns an error if the second argument is less than one.
     /// - Returns an error if the `--help` flag is used.
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 2 {
@@ -45,7 +46,7 @@ impl Config {
         let first_arg = &args[1];
         match first_arg.parse::<i32>() {
             Ok(number) => {
-                pass_len = number;
+                if number > 0 { pass_len = number; } else { return Err("ERROR: Password length needs to be an integer greater than zero."); }
             }
             Err(_) => {
                 return Err("ERROR: Insert a valid integer for the password length.");
@@ -92,6 +93,20 @@ impl Config {
             extra_sym,
             check_rep,
         });
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            len: 12,
+            upper: true,
+            lower: true,
+            numbers: true,
+            basic_sym: true,
+            extra_sym: false,
+            check_rep: false
+        }
     }
 }
 
@@ -307,10 +322,14 @@ impl PreviousCharacters {
 /// # Returns
 ///
 /// A `Result` type. On success, it returns `Ok(())`. On error, it returns an error wrapped in a `Box<dyn Error>`.
-pub fn run(config: Config) -> Result<String, Box<dyn Error>> {
+pub fn run(config: Config) -> Result<String, &'static str> {
     let mut password: String = String::from("");
     let mut previous_characters = PreviousCharacters::new();
     let symbols = Symbols::new(&config);
+
+    if config.len <= 0 {
+        return Err("ERROR: Insert a valid integer for the password length.");
+    }
 
     for _ in 0..config.len {
         let (str, char_type) = symbols.get_char_type();
@@ -332,8 +351,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn config_build_valid_args() {
-        // Test without flags provided
+    fn config_build_without_flags() {
         let program_name = String::from("program name");
         let password_len = String::from("16");
 
@@ -350,8 +368,12 @@ mod tests {
         };
 
         assert_eq!(Ok(config), Config::build(&args));
+    }
 
-        // Test with flags provided
+    #[test]
+    fn config_build_with_flags() {
+        let program_name = String::from("program name");
+        let password_len = String::from("16");
         let f1 = String::from("-u");
         let f2 = String::from("--lower");
         let f3 = String::from("-r");
@@ -378,19 +400,56 @@ mod tests {
     }
 
     #[test]
-    fn config_build_invalid_args() {
-        // Test with a non-numeric password length:
+    fn config_build_unsupported_flags() {
+        let args = vec!["program_name".to_string(), "12".to_string(), "--unknown-flag".to_string()];
+        assert!(Config::build(&args).is_ok());
+    }
+
+    #[test]
+    fn config_build_non_numeric_password_len() {
         let args = vec!["program_name".to_string(), "abc".to_string(), "-u".to_string()];
         assert_eq!("ERROR: Insert a valid integer for the password length.",
                    Config::build(&args).unwrap_err());
+    }
 
-        // Test with too few arguments:
+    #[test]
+    fn config_build_few_args() {
         let args = vec!["program_name".to_string()];
         assert_eq!("ERROR: No parameters passed!\nUsage: passgen [PASSWORD_LEN]",
                    Config::build(&args).unwrap_err());
+    }
 
-        // Test with unsupported flags:
-        let args = vec!["program_name".to_string(), "12".to_string(), "--unknown-flag".to_string()];
-        assert!(Config::build(&args).is_ok());
+    #[test]
+    fn run_zero_length() {
+        let config = Config { len: 0, ..Default::default() };
+        assert_eq!("ERROR: Insert a valid integer for the password length.",
+                   run(config).unwrap_err());
+    }
+
+    #[test]
+    fn run_negative_length() {
+        let config = Config { len: -1, ..Default::default() };
+        assert_eq!("ERROR: Insert a valid integer for the password length.",
+                   run(config).unwrap_err());
+    }
+
+    #[test]
+    fn generate_password() {
+        let config = Config {
+            len: 256,
+            upper: true,
+            lower: true,
+            numbers: true,
+            basic_sym: true,
+            extra_sym: false,
+            check_rep: true,
+        };
+        let password = run(config).unwrap();
+
+        assert_eq!(256, password.len());
+        assert!(password.chars().any(|c| c.is_uppercase()));
+        assert!(password.chars().any(|c| c.is_lowercase()));
+        assert!(password.chars().any(|c| c.is_numeric()));
+        assert!(password.chars().any(|c| "-+=*/><[]{}()".contains(c)));
     }
 }
